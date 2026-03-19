@@ -97,6 +97,20 @@ export default function SSGPage() {
         </div>
       </div>
 
+      <div className="bg-red-100 border-l-4 border-red-500 rounded-lg p-4 mb-6">
+        <p className="text-red-900 flex items-start">
+          <span className="mr-2 mt-1">❓</span>
+          <span>
+            <strong>Why is the product count different (e.g., 12) compared to other pages (25 or more)?</strong><br/><br/>
+            This is the key insight about <strong>Static Site Generation (SSG)</strong>: 
+            The data was <strong>"frozen" at the time this page was built</strong> (when you ran <code className="bg-red-200 px-1 rounded">npm run build</code>).
+            At that moment, the API had only 12 products. Even if the API now has 25+ products, this page still shows 12 because 
+            <strong> SSG pages never change unless you rebuild the entire application</strong>.<br/><br/>
+            Compare this to SSR (always fresh) or ISR (can be revalidated) - those pages will show the current data.
+          </span>
+        </p>
+      </div>
+
       <div className="bg-yellow-50 border-l-4 border-yellow-500 rounded-lg p-4 mb-6">
         <p className="text-yellow-900 flex items-center">
           <span className="mr-2">⚠️</span>
@@ -154,7 +168,12 @@ export default function SSGPage() {
             <li>The same pre-built HTML is served to every user</li>
             <li>No server-side processing is needed - files are served directly</li>
             <li>Extremely fast loading times and excellent for SEO</li>
+            <li><strong>Data is frozen at build time</strong> - won't update until rebuild</li>
           </ul>
+          <p className="bg-yellow-100 p-3 rounded-lg">
+            <strong>💡 Key Takeaway:</strong> SSG is perfect for content that rarely changes. 
+            But if your data changes frequently (like product counts), you'll need ISR or SSR instead.
+          </p>
           <p>
             <strong>Implementation:</strong> We use <code className="bg-blue-100 px-1 rounded">cache: 'force-cache'</code> 
             (or omit the cache option) to fetch and cache data at build time from <code className="bg-gray-100 px-1 rounded">{process.env.NEXT_PUBLIC_API_URL}/products</code>.

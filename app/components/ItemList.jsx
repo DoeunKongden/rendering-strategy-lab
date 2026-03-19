@@ -1,6 +1,6 @@
 import Image from 'next/image'
 
-export default function ItemList({ items, loading = false, title = "Item" }) {
+export default function ItemList({ items, loading = false, title = "Item", onDelete }) {
   if (loading) {
     return (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -67,6 +67,16 @@ export default function ItemList({ items, loading = false, title = "Item" }) {
               <p className="text-xs text-slate-400 dark:text-slate-500">
                 Added: {new Date(item.createdAt).toLocaleDateString()}
               </p>
+            </div>
+          )}
+          {onDelete && (
+            <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700">
+              <button
+                onClick={() => onDelete(item.id)}
+                className="text-red-500 hover:text-red-700 hover:bg-red-50 dark:hover:bg-red-900/30 px-3 py-1 rounded text-sm font-medium transition-colors"
+              >
+                🗑️ Delete
+              </button>
             </div>
           )}
         </div>

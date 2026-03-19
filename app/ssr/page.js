@@ -1,45 +1,17 @@
-'use client'
-
-import { useState, useEffect } from 'react'
-import ItemList from '../components/ItemList'
-import MetricsDisplay from '../components/MetricsDisplay'
-import ExplanationCard from '../components/ExplanationCard'
-
-export default function SSRPage() {
-  const [products, setProducts] = useState([])
-  const [loading, setLoading] = useState(true)
-  const [refetching, setRefetching] = useState(false)
-  const [lastFetch, setLastFetch] = useState(null)
-  const [message, setMessage] = useState('')
-
-  const fetchProducts = async (showLoading = false) => {
-    if (showLoading) setRefetching(true)
-    try {
-      const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://645865eb4eb3f674df739047.mockapi.io/api/v1'
-      const res = await fetch(`${apiUrl}/products?page=1&limit=25`, {
-        cache: 'no-store',
-      })
-      if (res.ok) {
-        const data = await res.json()
-        setProducts(data)
-        setLastFetch(new Date().toLocaleString())
-      }
-    } catch (error) {
-      console.error('Error fetching products:', error)
-    } finally {
-      if (showLoading) setRefetching(false)
-    }
+async function getProducts() {
+  const apiUrl = process.env.NEXT_PUBLIC_API_URL || 'https://645865eb4eb3f674df739047.mockapi.io/api/v1'
+  const res = await fetch(`${apiUrl}/products?page=1&limit=25`, {
+    cache: 'no-store',
+  })
+  if (!res.ok) {
+    throw new Error('Failed to fetch products')
   }
+  return res.json()
+}
 
-  useEffect(() => {
-    fetchProducts()
-  }, [])
-
-  const handleRefetch = async () => {
-    await fetchProducts(true)
-    setMessage('Fresh data fetched via POST request!')
-    setTimeout(() => setMessage(''), 3000)
-  }
+export default async function SSRPage() {
+  const products = await getProducts()
+  const serverBuildTime = new Date().toLocaleString()
 
   return (
     <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
@@ -55,14 +27,25 @@ export default function SSRPage() {
         </span>
       </div>
 
-      <MetricsDisplay
-        timestamp={lastFetch || 'Loading...'}
-        label="Current Timestamp"
-        badge="Data fetched on request"
-        badgeColor="bg-blue-100 text-blue-800"
-      />
+      <div className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 mb-6">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-blue-900 font-semibold">
+              🕐 <strong>Server Build Time:</strong>
+            </p>
+            <p className="text-blue-800 text-xl font-mono mt-1">
+              {serverBuildTime}
+            </p>
+          </div>
+          <div className="bg-blue-100 rounded-full px-4 py-2">
+            <span className="text-blue-800 text-sm font-medium">
+              ⚡ Rendered on every request
+            </span>
+          </div>
+        </div>
+      </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-6">
         <div className="bg-blue-100 dark:bg-blue-900/30 border-l-4 border-blue-500 rounded-lg p-4">
           <h3 className="font-semibold text-blue-900 dark:text-blue-300 mb-2">🛍️ Product Count</h3>
           <p className="text-blue-800 dark:text-blue-200 text-3xl font-bold">{products.length}</p>
@@ -75,66 +58,66 @@ export default function SSRPage() {
           <h3 className="font-semibold text-red-900 dark:text-red-300 mb-2">📦 Cache Method</h3>
           <p className="text-red-800 dark:text-red-200 font-mono">no-store</p>
         </div>
+        <div className="bg-green-100 dark:bg-green-900/30 border-l-4 border-green-500 rounded-lg p-4">
+          <h3 className="font-semibold text-green-900 dark:text-green-300 mb-2">🔄 Fresh on</h3>
+          <p className="text-green-800 dark:text-green-200 text-sm font-medium">Every Request</p>
+        </div>
+      </div>
+
+      <div className="bg-blue-50 border-l-4 border-blue-500 rounded-lg p-4 mb-6">
+        <p className="text-blue-900 flex items-start">
+          <span className="mr-2 mt-1">🔄</span>
+          <span>
+            <strong>How it works:</strong> This page is rendered on the server for <strong>every request</strong>.
+            The timestamp above shows exactly when the server built this page. Refresh the page to see it change!
+          </span>
+        </p>
       </div>
 
       <div className="card p-6 mb-8">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4 mb-6">
-          <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100">🛍️ Products from API</h2>
-          <button
-            onClick={handleRefetch}
-            disabled={refetching}
-            className="bg-blue-600 text-white px-6 py-3 rounded-lg font-semibold hover:bg-blue-700 transition-colors disabled:bg-blue-300 flex items-center justify-center space-x-2"
-          >
-            {refetching ? (
-              <>
-                <svg className="animate-spin h-5 w-5" viewBox="0 0 24 24">
-                  <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4" fill="none" />
-                  <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z" />
-                </svg>
-                <span>Fetching...</span>
-              </>
-            ) : (
-              <>
-                <span>🔄</span>
-                <span>Fetch Fresh Data (POST)</span>
-              </>
-            )}
-          </button>
-        </div>
-        
-        {message && (
-          <div className="mb-4 p-3 rounded-lg bg-green-100 dark:bg-green-900/30 text-green-800 dark:text-green-200 font-semibold">
-            {message}
-          </div>
-        )}
+        <h2 className="text-2xl font-bold text-slate-900 dark:text-slate-100 mb-6">
+          🛍️ Products from API
+        </h2>
         
         <p className="text-slate-600 dark:text-slate-300 mb-6">
-          This page fetches fresh data from the API on <strong>every request</strong>.
-          Click the button to see the timestamp change each time data is fetched!
+          This page fetches fresh data from the API <strong>on every server request</strong>.
+          The product data and page HTML are generated dynamically each time you load this page.
         </p>
-        <ItemList items={products} title="Product" />
+        
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {products.map((item) => (
+            <div
+              key={item.id}
+              className="card hover:shadow-lg transition-shadow p-4"
+            >
+              <div className="flex items-start space-x-4">
+                <div className="relative flex-shrink-0">
+                  <span className="bg-blue-500 text-white text-lg font-bold px-3 py-2 rounded-lg">
+                    #{item.id}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0">
+                  <h3 className="text-lg font-semibold text-slate-900 dark:text-slate-100 truncate">
+                    {item.name}
+                  </h3>
+                  {item.price && (
+                    <p className="text-lg font-bold text-emerald-600 dark:text-emerald-400 mt-1">${item.price}</p>
+                  )}
+                </div>
+              </div>
+              {item.createdAt && (
+                <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700">
+                  <p className="text-xs text-slate-400 dark:text-slate-500">
+                    Added: {new Date(item.createdAt).toLocaleDateString()}
+                  </p>
+                </div>
+              )}
+            </div>
+          ))}
+        </div>
       </div>
 
-      <ExplanationCard title="How SSR Works">
-        <div className="space-y-4">
-          <p>
-            <strong>Server-Side Rendering (SSR)</strong> means that the HTML for a page is 
-            generated on the server for each request. In Next.js, when you use SSR:
-          </p>
-          <ul className="list-disc list-inside space-y-2 ml-4">
-            <li>Every time a user requests a page, the server makes a fresh API call</li>
-            <li>The server waits for the data to arrive before sending HTML to the browser</li>
-            <li>The page content is always up-to-date and reflects the current database state</li>
-            <li>This happens on every single request - there's no caching by default</li>
-          </ul>
-          <p>
-            <strong>Implementation:</strong> We use <code className="bg-blue-100 dark:bg-blue-900/50 px-1 rounded">cache: 'no-store'</code> in our fetch call to prevent caching.
-            This means every request to the server triggers a fresh API call to <code className="bg-gray-100 dark:bg-slate-800 px-1 rounded">{process.env.NEXT_PUBLIC_API_URL}/products</code>.
-          </p>
-        </div>
-      </ExplanationCard>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
         <div className="bg-green-50 dark:bg-green-900/20 border-l-4 border-green-500 rounded-lg p-4">
           <h3 className="font-semibold text-green-900 dark:text-green-300 mb-2">✅ Best For:</h3>
           <ul className="text-green-800 dark:text-green-200 text-sm space-y-1">
@@ -155,15 +138,58 @@ export default function SSRPage() {
         </div>
       </div>
 
-      <div className="card bg-slate-950 text-white p-6 mt-6">
-        <h3 className="text-lg font-semibold text-white mb-4">💻 Code Example - SSR Fetch</h3>
-        <pre className="bg-slate-900 rounded-lg p-4 overflow-x-auto text-sm">
-          <code className="text-emerald-400">{`async function fetchProducts() {
+      <div className="bg-slate-50 border-l-4 border-slate-500 rounded-lg p-4 mb-6">
+        <h3 className="font-semibold text-slate-900 mb-2">🔑 Key Difference from SSG/ISR</h3>
+        <p className="text-slate-700 text-sm">
+          With <strong>SSR</strong>, the server builds a <strong>new page for every request</strong>. 
+          Compare this to SSG (built once at compile time) or ISR (built once, then revalidated).
+          Watch the server build time above change on each refresh!
+        </p>
+      </div>
+
+      <div className="card bg-slate-950 text-white p-6">
+        <h3 className="text-lg font-semibold text-white mb-4">💻 Code Example - Server Component with SSR</h3>
+        <pre className="bg-slate-900 rounded-lg p-4 overflow-x-auto text-sm mb-4">
+          <code className="text-emerald-400">{`// This is a Server Component (no 'use client')
+// Data is fetched on the SERVER for EVERY request
+
+async function getProducts() {
   const apiUrl = process.env.NEXT_PUBLIC_API_URL
   const res = await fetch(\`\${apiUrl}/products\`, {
-    cache: 'no-store'  // Don't cache, fetch fresh data
+    cache: 'no-store'  // Don't cache - fetch fresh data
   })
   return res.json()
+}
+
+export default async function SSRPage() {
+  // This runs on EVERY request
+  const serverRenderTime = new Date().toLocaleString()
+  const products = await getProducts()
+  
+  return (
+    <div>
+      <p>Page built at: {serverRenderTime}</p>
+      <ProductList items={products} />
+    </div>
+  )
+}`}</code>
+        </pre>
+        <h3 className="text-lg font-semibold text-white mb-4">💻 Code Example - Client Component</h3>
+        <pre className="bg-gray-800 rounded-lg p-4 overflow-x-auto text-sm">
+          <code className="text-emerald-400">{`// This is a Client Component (with 'use client')
+// Data is fetched in the BROWSER, not on server
+
+'use client'
+
+export default function CSRPage() {
+  const [products, setProducts] = useState([])
+  
+  useEffect(() => {
+    // Fetch happens in browser
+    fetchProducts()
+  }, [])
+  
+  return <ProductList items={products} />
 }`}</code>
         </pre>
       </div>

@@ -14,19 +14,19 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
-      <Script id="theme-init" strategy="beforeInteractive">
-        {`(function() {
-          try {
-            const stored = window.localStorage.getItem('theme');
-            const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-            const theme = stored === 'dark' || stored === 'light' ? stored : (prefersDark ? 'dark' : 'light');
-            if (theme === 'dark') document.documentElement.classList.add('dark');
-          } catch (e) {
-            // ignore
-          }
-        })();`}
-      </Script>
       <body className={`${inter.className} min-h-screen flex flex-col bg-gradient-to-b from-slate-50 via-white to-slate-100 text-slate-900 antialiased dark:bg-slate-950 dark:text-slate-100`}>
+        <Script id="theme-init" strategy="beforeInteractive">
+          {`(function() {
+            try {
+              const stored = window.localStorage.getItem('theme');
+              const prefersDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+              const theme = stored === 'dark' || stored === 'light' ? stored : (prefersDark ? 'dark' : 'light');
+              if (theme === 'dark') document.documentElement.classList.add('dark');
+            } catch (e) {
+              // ignore
+            }
+          })();`}
+        </Script>
         <Navigation />
         <main className="flex-grow">
           <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-10">

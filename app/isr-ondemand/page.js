@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react'
 import ItemList from '../components/ItemList'
 import MetricsDisplay from '../components/MetricsDisplay'
 import ExplanationCard from '../components/ExplanationCard'
-import { refreshDogsAction, refreshProductsAction, refreshDogsPathAction, refreshProductsPathAction } from '../actions/revalidate'
+import { refreshDogsAction, refreshProductsAction, refreshDogsPathAction, refreshProductsPathAction, deleteDogAction, deleteProductAction } from '../actions/revalidate'
 
 export default function ISROnDemandPage() {
   const [dogs, setDogs] = useState([])
@@ -91,6 +91,28 @@ export default function ISROnDemandPage() {
     } finally {
       setRevalidatingPath(false)
       setTimeout(() => setMessage(''), 3000)
+    }
+  }
+
+  const handleDeleteDog = async (dogId) => {
+    if (!confirm('Are you sure you want to delete this dog?')) return
+    
+    const result = await deleteDogAction(dogId)
+    if (result.success) {
+      setDogs(dogs.filter(d => d.id !== dogId))
+    } else {
+      alert(`Failed to delete: ${result.error}`)
+    }
+  }
+
+  const handleDeleteProduct = async (productId) => {
+    if (!confirm('Are you sure you want to delete this product?')) return
+    
+    const result = await deleteProductAction(productId)
+    if (result.success) {
+      setProducts(products.filter(p => p.id !== productId))
+    } else {
+      alert(`Failed to delete: ${result.error}`)
     }
   }
 
@@ -239,9 +261,9 @@ export default function ISROnDemandPage() {
             </svg>
           </div>
         ) : activeTab === 'dogs' ? (
-          <ItemList items={dogs} title="Dog" />
+          <ItemList items={dogs} title="Dog" onDelete={handleDeleteDog} />
         ) : (
-          <ItemList items={products} title="Product" />
+          <ItemList items={products} title="Product" onDelete={handleDeleteProduct} />
         )}
       </div>
 

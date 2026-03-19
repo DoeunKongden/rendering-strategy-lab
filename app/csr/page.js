@@ -4,6 +4,7 @@ import { useState, useEffect, useRef } from 'react'
 import ItemList from '../components/ItemList'
 import MetricsDisplay from '../components/MetricsDisplay'
 import ExplanationCard from '../components/ExplanationCard'
+import { deleteProductAction } from '../actions/revalidate'
 
 export default function CSRPage() {
   const [products, setProducts] = useState([])
@@ -36,6 +37,17 @@ export default function CSRPage() {
       setError(err.message)
     } finally {
       setLoading(false)
+    }
+  }
+
+  const handleDeleteProduct = async (productId) => {
+    if (!confirm('Are you sure you want to delete this product?')) return
+    
+    const result = await deleteProductAction(productId)
+    if (result.success) {
+      setProducts(products.filter(p => p.id !== productId))
+    } else {
+      alert(`Failed to delete: ${result.error}`)
     }
   }
 
@@ -138,7 +150,7 @@ export default function CSRPage() {
           This page uses <strong>Client-Side Rendering</strong>. Data is fetched in the browser 
           after the JavaScript loads. Notice the loading state!
         </p>
-        <ItemList items={products} loading={loading} title="Product" />
+        <ItemList items={products} loading={loading} title="Product" onDelete={handleDeleteProduct} />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">

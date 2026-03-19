@@ -1,5 +1,6 @@
 import Link from 'next/link'
 import StrategyCard from './components/StrategyCard'
+import RevalidateButtons from './components/RevalidateButtons'
 
 export default function Home() {
   const strategies = [
@@ -210,6 +211,8 @@ export default function Home() {
           </Link>
         </div>
       </div>
+
+      <RevalidateButtons />
     </div>
   )
 }
