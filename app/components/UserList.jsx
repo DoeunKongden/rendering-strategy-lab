@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import ClientTimestamp from './ClientTimestamp'
 
 export default function UserList({ users, loading = false }) {
   if (loading) {
@@ -57,7 +58,7 @@ export default function UserList({ users, loading = false }) {
           {user.createdAt && (
             <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700">
               <p className="text-xs text-gray-400 dark:text-slate-500">
-                Created: {new Date(user.createdAt).toLocaleDateString()}
+                Created: <ClientTimestamp value={new Date(user.createdAt).toLocaleDateString()} className="inline" />
               </p>
             </div>
           )}

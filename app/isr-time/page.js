@@ -12,6 +12,8 @@ async function getProducts() {
   return res.json()
 }
 
+import ClientTimestamp from '../components/ClientTimestamp'
+
 export default async function ISRTimePage() {
   const products = await getProducts()
   
@@ -89,7 +91,7 @@ export default async function ISRTimePage() {
               {item.createdAt && (
                 <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700">
                   <p className="text-xs text-slate-400 dark:text-slate-500">
-                    Added: {new Date(item.createdAt).toLocaleDateString()}
+                    Added: <ClientTimestamp value={new Date(item.createdAt).toLocaleDateString()} className="inline" />
                   </p>
                 </div>
               )}

@@ -9,6 +9,8 @@ async function getProducts() {
   return res.json()
 }
 
+import ClientTimestamp from '../components/ClientTimestamp'
+
 export default async function SSRPage() {
   const products = await getProducts()
   const serverBuildTime = new Date().toLocaleString()
@@ -33,9 +35,7 @@ export default async function SSRPage() {
             <p className="text-blue-900 font-semibold">
               🕐 <strong>Server Build Time:</strong>
             </p>
-            <p className="text-blue-800 text-xl font-mono mt-1">
-              {serverBuildTime}
-            </p>
+            <ClientTimestamp value={serverBuildTime} className="text-blue-800 text-xl font-mono mt-1 block" />
           </div>
           <div className="bg-blue-100 rounded-full px-4 py-2">
             <span className="text-blue-800 text-sm font-medium">
@@ -108,7 +108,7 @@ export default async function SSRPage() {
               {item.createdAt && (
                 <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700">
                   <p className="text-xs text-slate-400 dark:text-slate-500">
-                    Added: {new Date(item.createdAt).toLocaleDateString()}
+                    Added: <ClientTimestamp value={new Date(item.createdAt).toLocaleDateString()} className="inline" />
                   </p>
                 </div>
               )}

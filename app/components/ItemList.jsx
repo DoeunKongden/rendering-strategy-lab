@@ -1,4 +1,5 @@
 import Image from 'next/image'
+import ClientTimestamp from './ClientTimestamp'
 
 export default function ItemList({ items, loading = false, title = "Item", onDelete }) {
   if (loading) {
@@ -65,7 +66,7 @@ export default function ItemList({ items, loading = false, title = "Item", onDel
           {item.createdAt && (
             <div className="mt-3 pt-3 border-t border-gray-100 dark:border-slate-700">
               <p className="text-xs text-slate-400 dark:text-slate-500">
-                Added: {new Date(item.createdAt).toLocaleDateString()}
+                Added: <ClientTimestamp value={new Date(item.createdAt).toLocaleDateString()} className="inline" />
               </p>
             </div>
           )}
